@@ -1,0 +1,14 @@
+.{
+    .name = "zig-blackjack",
+    .version = "0.0.1",
+    .dependencies = .{
+        .raylib = .{
+            .url = "https://github.com/Not-Nik/raylib-zig/archive/6ee4dee3df169202c43720cf79eb0d3053c6d44a.tar.gz",
+            .hash = "12209353f701b35d05135bf3a4fc35e391eb9ef4f55fe164eb9a97280452eb06fa2f",
+        },
+        .raygui = .{
+            .url = "https://github.com/cactusbento/zig-raygui/archive/b01d6ec9161557901561519152ede11ddd3b620b.tar.gz",
+            .hash = "1220dba591a80fe0b90b832cecde0ea1d2e56c7d49327b8904c71fedbcf6909dd65c",
+        },
+    },
+}
