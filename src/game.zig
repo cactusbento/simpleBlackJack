@@ -23,13 +23,16 @@ pub const FiniteStateMachine = struct {
     player: Player,
     dealer: Dealer,
 
-    pub fn init(allocator: std.mem.Allocator) FiniteStateMachine {
+    timer: std.time.Timer,
+
+    pub fn init(allocator: std.mem.Allocator) !FiniteStateMachine {
         rng = std.rand.DefaultPrng.init(@intCast(std.time.timestamp()));
         return .{
             .allocator = allocator,
             .state = .game_start,
             .player = Player.init(allocator),
             .dealer = Dealer.init(allocator),
+            .timer = try std.time.Timer.start(),
         };
     }
 
@@ -68,7 +71,9 @@ pub const FiniteStateMachine = struct {
                 defer self.dealer.draw();
 
                 buttons.hit.rect.y = self.player.hand.pos.y - 60;
+                buttons.hit.rect.x = self.player.hand.pos.x - (buttons.hit.rect.width / 2);
                 buttons.stand.rect.y = self.player.hand.pos.y - 100;
+                buttons.stand.rect.x = self.player.hand.pos.x - (buttons.stand.rect.width / 2);
 
                 const val = Value.count(self.player.hand);
 
@@ -101,23 +106,30 @@ pub const FiniteStateMachine = struct {
                 for (self.dealer.hand.cards.items) |*c| {
                     if (c.is_flipped) {
                         c.is_flipped = false;
-                        std.time.sleep(std.time.ns_per_ms * 750);
+                        self.timer.reset();
                         return;
                     }
                 }
 
                 const val = Value.count(self.dealer.hand);
                 if (val.low < 17) {
-                    std.time.sleep(std.time.ns_per_ms * 750);
+                    if (self.timer.read() < std.time.ns_per_ms * 750) {
+                        return;
+                    } else {
+                        self.timer.reset();
+                    }
+
                     try self.dealer.hand.add(randomCard());
                 } else {
                     self.state = .game_end;
+                    self.timer.reset();
                 }
             },
             .game_end => {
                 defer self.player.draw();
                 defer self.dealer.draw();
-                std.time.sleep(std.time.ns_per_ms * 1500);
+
+                if (self.timer.read() < std.time.ns_per_ms * 1500) return;
 
                 self.state = .game_start;
             },

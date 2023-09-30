@@ -22,7 +22,7 @@ pub fn main() !void {
 
     rl.setTargetFPS(60);
 
-    var game_state = game.FiniteStateMachine.init(allocator);
+    var game_state = try game.FiniteStateMachine.init(allocator);
     defer game_state.deinit();
 
     while (!rl.windowShouldClose()) {
